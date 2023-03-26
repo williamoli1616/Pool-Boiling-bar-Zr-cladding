@@ -23,7 +23,7 @@ Mass_Zr = V_clad*rho_Zr; %Mass of the cladding Kg
 Cs = Mass_Zr*cs_Zr; %Capacity of Zirconium J/K
 Wetted_area = clad_diam_outer*pi*clad_length; %Outer wetted area of the cladding
 T_wall_0 = 100.01; %Initial temperature of the wall of the cladding in Celsius for 1 BAR 
-k_Zr= 8.8527+7.0820*(10^-3)*T+2.5329*(10^-6)*(T^2)+2.9918*(10^3)*(T^(-1)); %Formula for thermal conductivity of zirconium as a function of temperature
+%k_Zr= 8.8527+7.0820*(10^-3)*T+2.5329*(10^-6)*(T^2)+2.9918*(10^3)*(T^(-1)); %Formula for thermal conductivity of zirconium as a function of temperature
 
 %Coolant characteristics
 P_in = 1; %bar
@@ -273,7 +273,10 @@ xlabel('Time [s]')
 ylabel('T-wall-NB-Rosenhow [°C]')
 grid on
 
-%%
+%% The Limitation of using a method where the temperature profile is uniform over time.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculation that predicts when the Rosenhow model shoud stop working at time 't'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 stop=1;
 ii=0;
 while stop>0
@@ -307,6 +310,38 @@ plot(time_Bi, T_wall_Bi-273.15, LineWidth=2)
 xlabel('Time [s]')
 ylabel('T-wall-NB [°C]')
 title('Time evaluation for when Bi < 0.1 for Wall Temp')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculation that predicts when the Mostinski model shoud stop working at time 't'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+stop=1;
+ii=0;
+while stop>0
+ii=ii+1;
+qs_nb_MOST(ii) = most_const.*(T_wall_nb_MOST(ii)-T_in).^(10/3); %Heat flux calculated in Nucleate boiling W/m2
+alfa_nb_MOST(ii) = most_const.*(T_wall_nb_MOST(ii)-T_in).^(7/3);
+heat_Bi_MOST(ii) = Q_rod - qs_nb_MOST(ii).*Wetted_area;
+k_Zr(ii)= 8.8527 + 7.0820.*(10.^-3).*T_wall_nb_R(ii)+ 2.5329.*(10^-6).*(T_wall_nb_R(ii).^2)+2.9918.*(10.^3).*(T_wall_nb_R(ii).^(-1));
+Bi_MOST(ii) = alfa_nb_MOST(ii)*(V_clad/Wetted_area)/k_Zr(ii);
+    if Bi_MOST(ii)>0.1
+       stop=-1;
+       last_ii = ii;
+   
+    end
+end
+
+t_stop_71_MOST = time_nb_R(ii)
+for kk=1:1:ii
+    time_Bi_MOST(kk) = time_nb_R(kk);
+    T_wall_Bi_MOST(kk) = T_wall_nb_R(ii);
+end
+figure(10)
+plot(time_Bi_MOST, heat_Bi_MOST)
+title('Time evaluation for when Bi < 0.1, Mostinski model')
+grid on
+figure(11)
+plot(time_Bi_MOST, T_wall_Bi_MOST, LineWidth=4)
+title('Time evaluation for when Bi < 0.1 for Wall Temp, Mostinski model')
+grid on
 
 
 
@@ -345,25 +380,4 @@ xlabel('Time [s]')
 ylabel('T-Wall-Film [°C]')
 grid on
 
-%%
-stop=1;
-ii=0;
-while stop>0
-ii=ii+1;
-alfa_nb_film(ii) = C1.*((hlg.*film_const+C2.*cpg.*film_const.*(T_wall_film(ii)-T_in))./(T_wall_film(ii)-T_in)).^(1/4);
-k_Zr(ii)= 8.8527 + 7.0820.*(10.^-3).*T_wall_film(ii)+ 2.5329.*(10^-6).*(T_wall_film(ii).^2)+2.9918.*(10.^3).*(T_wall_film(ii).^(-1));
-Bi(ii) = alfa_nb_film(ii).*(V_clad/Wetted_area)./k_Zr(ii);
 
-if Bi(ii)>0.1
-       stop=-1;
-       last_ii = ii;
-   
-    end
-end
-t_stop_1 = time_film(ii)
-
-for kk=1:1:ii
-    time_Bi_film(kk)=time_nb_film(kk);
-    T_wall_Bi_film(kk) = T_wall_nb_film(ii);
-
-end
