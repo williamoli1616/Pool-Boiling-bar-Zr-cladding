@@ -196,7 +196,7 @@ deltaRHO=rho_in_L-rho_in_V;
 R_constant = mu*hlg*sqrt((g*deltaRHO)/sigma)*(cp/(Csf*hlg*Pr))^3; %Rosenhow constant
 
 %Evaluating the Critical Heat flux using Kutateladze model
-Kut_coeff=0.118;
+Kut_coeff=0.16;
 qchf_kut = Kut_coeff*sqrt(rho_in_V)*hlg*(sigma*g*deltaRHO)^(1/4);
 
 %Determining the ONB temperature using the Rosenhow model
