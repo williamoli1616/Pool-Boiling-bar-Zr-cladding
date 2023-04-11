@@ -7,7 +7,7 @@
 %Data
 k=18.9738; %Zirconium cladding Thermal conductivity; [W/(m K)]
 h = 4.0172e+03; %Heat transfer coefficient for convection [W/m2K]
-R = 5.6e-3; %Rod length [m]
+R = 5.6e-3; %Rod radius [m]
 cs = 270; %Specific heat of Zirconium [[J/Kg K]
 rho = 6511; %Density of the Zirconium cladding [Kg/m3]
 q =7.0052e+6; %Heat density at the center [W/m3]
